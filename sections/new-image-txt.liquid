@@ -1,0 +1,90 @@
+{% schema %}
+{
+  "name": "New Image with Text",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Our Featured Products"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_with_text",
+      "name": "Image with Text",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Image"
+        },
+          {
+          "type": "image_picker",
+          "id": "image-icon",
+          "label": "Image"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Sample Heading"
+        },
+        {
+          "type": "text",
+          "id": "text",
+          "label": "Text",
+          "default": "Sample text for the image."
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Link",
+          "info": "Select a product or collection link"
+        },
+        {
+          "type": "text",
+          "id": "link_label",
+          "label": "Link Label",
+          "default": "Learn More"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Image with Text"
+    }
+  ]
+}
+{% endschema %}
+<div class=" wrapper-spacing--h">
+<div class="custom-section">
+ {% if section.settings.section_title != blank %}
+      <h2>{{ section.settings.section_title }}</h2>
+    {% endif %}
+   <div class="width--content">
+  <div class="img-row">
+    {% for block in section.blocks %}
+       
+      <div class="img-col block-{{ block.id }}">
+          <div class="img-block">
+            <img src="{{ block.settings.image | img_url: 'master' }}" alt="Image">
+          </div>
+          <div class="content-block">
+            <h3>{{ block.settings.heading }}</h3>
+            <p>{{ block.settings.text }}</p>
+            {% if block.settings.link != blank %}
+              <a class="homepage-featured-box-btn new-btn" href="{{ block.settings.link }}">{{ block.settings.link_label }}</a>
+                     <div class="color-11">   <img src="{{ block.settings.image-icon | img_url: 'master' }}" alt="Image"></div>
+            {% endif %}
+    
+      </div>
+        </div>
+    {% endfor %}
+          </div>
+  </div>
+</div>
+</div>
+
+

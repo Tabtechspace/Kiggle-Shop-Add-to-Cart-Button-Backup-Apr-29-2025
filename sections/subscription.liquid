@@ -1,0 +1,576 @@
+<!-- Include intl-tel-input CSS -->
+<link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css"
+/>
+
+<!-- Include intl-tel-input JS -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/intlTelInput.min.js"></script>
+
+<section class="wrapper-spacing--h width--content subscription-container">
+  <div class="width--content subscription-wrapper" style="background-color: {{ section.settings.background_color }};">
+    <div class="subscription-row">
+      {% form 'customer', id: form_id, class: 'subscription-form' %}
+        <div class="form-block">
+          <div class="subscription-col">
+            <h2>{{ section.settings.mailing_title }}</h2>
+            <p>{{ section.settings.mailing_description }}</p>
+          </div>
+
+          <div class="input-field">
+            <div class="subscription-form">
+              <div class="input-flex-box">
+                <!-- Email Input -->
+                <div class="input-block">
+                  <span class="mandatory">Email*</span>
+                  <div class="input-container">
+                    <input 
+                      type="email" 
+                      name="contact[email]" 
+                      placeholder="abc@gmail.com" 
+                      autocomplete="on" 
+                      required 
+                      id="email-input"
+                      title="Please enter a valid email address"
+                    />
+                    <div id="email-error" style="color: red; display: none; font-size: 12px;"></div>
+                    
+<div class="policy-link desk-policy">
+{{ section.settings.privacy_text }}
+</div>
+                  </div>
+                </div>
+
+                <!-- Phone Input -->
+                <div class="input-block">
+                  <span class="mandatory">Phone Number (Optional)</span>
+                  <div class="input-container">
+                    <input 
+                      type="tel" 
+                      id="phone-input" 
+                      name="contact[note]" 
+                      placeholder="Enter phone number" 
+                      autocomplete="on" 
+                      title="Please enter a valid phone number"
+                    />
+                    <div id="phone-error" style="color: red; display: none; font-size: 12px;"></div>
+                    <div class="policy-link mobile-policy">
+{{ section.settings.privacy_text }}
+</div>
+                  </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="input-btn">
+                  <button type="submit" id="submit-button" disabled class="disabled">
+                    {{ section.settings.text_button_text }}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      {% endform %}
+    </div>
+  </div>
+</section>
+<!-- Popup Message -->
+<div id="popup-message" class="popup hidden">
+  <div class="popup-content">
+    <p>Thank you for subscribing!</p>
+    <button id="close-popup"><i class="fa-solid fa-circle-check"></i></button>
+  </div>
+</div>
+
+
+<script>
+  // Restrict input to numeric values only for the phone input field
+document.getElementById('phone-input').addEventListener('keypress', function (e) {
+  const charCode = e.charCode ? e.charCode : e.keyCode;
+  
+  // Allow only numbers (ASCII codes 48-57) and control keys like backspace
+  if (charCode < 48 || charCode > 57) {
+    e.preventDefault();
+  }
+});
+
+// Limit phone input length to 10 digits
+document.getElementById('phone-input').addEventListener('input', function (e) {
+  const maxLength = 10; // Set maximum length
+  if (this.value.length > maxLength) {
+    this.value = this.value.slice(0, maxLength); // Truncate excess digits
+  }
+});
+
+// Phone number validation and submit button control
+document.getElementById('phone-input').addEventListener('input', function () {
+  const phoneInput = document.getElementById('phone-input');
+  const phoneError = document.getElementById('phone-error');
+  const submitButton = document.getElementById('submit-button');
+  
+  const phoneRegex = /^\d{10}$/; // Regex for valid 10-digit phone number
+
+  // Clear the error message initially
+  phoneError.style.display = 'none';
+  phoneError.textContent = '';
+
+  // Check if the phone number is valid (10 digits)
+  if (phoneRegex.test(phoneInput.value)) {
+    submitButton.disabled = false;
+    submitButton.classList.remove('disabled');
+  } else if (phoneInput.value !== '') {
+    // Show error message if invalid
+    phoneError.style.display = 'block';
+    phoneError.textContent = 'Please enter a valid 10-digit phone number';
+    submitButton.disabled = true;
+    submitButton.classList.add('disabled');
+  }
+});
+
+// Initialize intl-tel-input with country code and validation
+const phoneInputField = document.querySelector("#phone-input");
+const phoneInput = window.intlTelInput(phoneInputField, {
+  initialCountry: "in", // Set initial country
+  separateDialCode: true,
+  utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/js/utils.js",
+});
+
+// Phone number validation with intl-tel-input
+phoneInputField.addEventListener('input', function () {
+  const phoneError = document.getElementById('phone-error');
+  const submitButton = document.getElementById('submit-button');
+  
+  if (phoneInput.isValidNumber()) {
+    phoneError.style.display = 'none'; // Hide error
+    submitButton.disabled = false;    // Enable submit button
+    submitButton.classList.remove('disabled');
+  } else {
+    phoneError.style.display = 'block'; // Show error
+    phoneError.textContent = "Please enter a valid phone number.";
+    submitButton.disabled = true;     // Disable submit button
+    submitButton.classList.add('disabled');
+  }
+});
+
+// Append the full phone number (including country code) before form submission
+document.querySelector('.subscription-form').addEventListener('submit', function (e) {
+  if (!phoneInput.isValidNumber()) {
+    e.preventDefault();
+    document.getElementById('phone-error').textContent = "Please enter a valid phone number.";
+    return;
+  }
+  const fullPhoneNumber = phoneInput.getNumber(); // Get full phone number
+  phoneInputField.value = fullPhoneNumber;        // Update the input value with the full number
+});
+
+// Email input validation
+document.getElementById('email-input').addEventListener('input', function () {
+  const emailInput = this;
+  const emailError = document.getElementById('email-error');
+  const submitButton = document.getElementById('submit-button');
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.(com|shop|in|co)$/;
+
+  if (emailRegex.test(emailInput.value)) {
+    emailError.style.display = 'none'; // Hide error
+    submitButton.disabled = false;    // Enable submit button
+    submitButton.classList.remove('disabled');
+  } else {
+    emailError.style.display = 'block'; // Show error
+    emailError.textContent = "Please enter a valid email address.";
+    submitButton.disabled = true;     // Disable submit button
+    submitButton.classList.add('disabled');
+  }
+});
+
+</script>
+
+
+<style>
+  /* Styling for the disabled submit button */
+  .disabled {
+    background-color: #ccc;  /* Gray background when disabled */
+    cursor: not-allowed;     /* Change cursor to indicate it is not clickable */
+  }
+
+  /* Styling for error message */
+  #email-error {
+    color: red;
+    font-size: 12px;
+        transition: all .3s ease-in-out;
+    margin-top: 5px;
+  }
+  input#note-input {
+    padding: .75rem 3rem;
+}
+  .iti {
+
+    width: 100%;
+}
+</style>
+
+
+<style>
+button.disabled {
+    opacity: 0.8;
+    cursor: not-allowed !important;
+}
+    #email-input:-webkit-autofill {
+    background-color: transparent !important;
+    -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+    -webkit-text-fill-color: black !important;
+  }
+</style>
+<script>
+  const noteInput = document.getElementById('note-input');
+  
+  noteInput.addEventListener('input', () => {
+    // Limit to 10 digits
+    if (noteInput.value.length > 10) {
+      noteInput.value = noteInput.value.slice(0, 10);
+    }
+  });
+</script>
+<style>
+    .subscription-container {
+           color: #000000;
+    padding-top: 35px;
+    padding-bottom: 70px;
+    }
+    .subscription-wrapper {
+         padding: 2.5rem 4rem;
+      margin: 0 auto;
+    }
+    .subscription-row {
+
+      gap: 4rem;
+      align-items: baseline;
+      justify-content: center;
+    }
+    .subscription-col {
+      flex: 1;
+    }
+    .form-block {
+     
+        
+    }
+.input-block {
+    flex: 1;
+    margin-right: 1rem;
+    margin-top: 1rem;
+}
+  span.mandatory {
+    font-size: 15px;
+}
+    .input-container {
+      position: relative;
+     margin-top: 6px;
+    }
+    .input-container input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid #000000;
+          background-color: transparent !important;
+      border-radius: 5px;
+      font-size: 14px;
+      line-height: 1.2;
+      outline: none;
+    }
+
+    .input-container label {
+      position: absolute;
+      top: 50%; /* Adjust this value if necessary */
+      left: 0.75rem;
+      color: #000;
+      font-size: 14px;
+      transform: translateY(-60%); /* Adjust this value to better align with the input */
+      transition: 0.2s ease all;
+      pointer-events: none;
+     background-color: transparent !important;
+      padding: 0 0.2rem;
+    }
+
+    .input-container input:focus + label,
+    .input-container input:not(:placeholder-shown) + label {
+      top: -0.6rem;
+      font-size: 0.8rem;
+      color: #565656;
+      transform: translateY(0);
+        font-family: "Organic-Brand" !important;
+        background-color: transparent !important;
+    }
+
+     .input-container input:not(.btn):focus {
+       border: 1px solid #000000 !important;
+        background-color: transparent !important;
+    }
+    .subscription-form button {
+       padding: 0.5rem 1rem;
+          font-family: "Organic-Brand" !important;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        height: 100%;
+          margin-top: 46px;
+
+    }
+  .subscription-row .policy-link {
+      padding-top: 10px;
+      font-size: 12px;
+  }
+        .subscription-btn {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+    @media (max-width: 767px) {
+      .subscription-row, .form-block {
+      display: block;
+
+    }
+      .subscription-form button {
+
+        position: unset;
+        margin: 1rem 0;
+
+    }
+      .desk-policy {
+        display: none;
+      }
+      .input-btn {
+    text-align: center;
+                padding-top: 2rem;
+}
+      .input-flex-box, .mobile-policy {
+    display: block !important;
+}
+      .input-block {
+    flex: 1;
+     margin-right: 0rem !important;
+    margin-top: 1rem;
+}
+      .subscription-col {
+            text-align: center;
+               padding: 2rem 0 .5rem;
+    }
+      .input-field {
+          padding: 0rem 0 1rem !important;
+      }
+      .subscription-wrapper {
+        padding: 2rem;
+        margin: 0 auto;
+    }
+      .subscription-container {
+
+        padding-left: 0;
+        padding-right: 0;
+    }
+      .popup {
+    position: fixed;
+    top: 12% !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 85% !important;
+    margin: 0 auto;
+    transform: unset !important;
+}
+    }
+  
+
+    @media (min-width: 767px) {
+        .subscription-col {
+           margin-right: 1rem;
+         
+        margin-bottom: 1.5rem;
+    }
+       .mobile-policy {
+        display: none;
+      }
+
+    }
+
+    .hidden {
+    display: none;
+  }
+  .popup {
+       position: fixed;
+    top: 50%;
+    left: 50%;
+    right: 0%;
+    transform: translate(-50%, -50%);
+    background: #0da41b;
+    /* border: 1px solid #ccc; */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    padding: .5rem 1.5rem;
+    border-radius: 5px;
+    width: fit-content;
+
+  }
+ .popup-content {
+    text-align: center;
+    display: flex;
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+}
+  .popup-content button {
+    background-color: transparent;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 2.5rem;
+  }
+  .popup-content p {
+        margin: 0;
+    color: white;
+}
+
+  .input-container input[type="email"], input[type="number"] {
+  background-color: transparent !important; 
+
+}
+
+  .input-container input[type="email"]:focus, input[type="number"]:focus {
+  background-color: transparent !important;  
+    
+}
+
+  .input-container input[type="email"]:invalid, input[type="number"]:invalid {
+  background-color: transparent !important;  
+}
+ .input-container input, 
+ .input-container input:focus, 
+ .input-container input:focus-visible, 
+ .input-container input:focus-within, 
+ .input-container input:active, 
+ .input-container input:target, 
+ .input-container input:visited {
+  -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    background: transparent !important;
+    background-clip: padding-box !important;
+    background-image: linear-gradient(transparent,transparent) !important;
+    background-color: transparent !important;
+}
+  .input-container input:-webkit-autofill,
+ .input-container  input:-webkit-autofill:hover, 
+ .input-container  input:-webkit-autofill:focus, 
+ .input-container  input:-webkit-autofill:active{
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: black !important;
+    transition: background-color 5000s ease-in-out 0s !important;
+    box-shadow: none;
+}
+
+  .input-flex-box {
+    display: flex;
+   align-items: flex-start;
+        flex-wrap: wrap;
+}
+  input#phone-input {
+    padding-left: 3rem;
+}
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  const form = document.querySelector(".subscription-form");
+  const popup = document.getElementById("popup-message");
+  const closePopup = document.getElementById("close-popup");
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent default form submission
+    popup.classList.add("show"); // Add the show class to trigger the animation
+  });
+
+  closePopup.addEventListener("click", function () {
+    popup.classList.remove("show"); // Remove the show class to hide the popup
+  });
+});
+
+</script>
+
+
+
+{% schema %}
+{
+  "name": "Subscription Section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "mailing_title",
+      "label": "Mailing List Title",
+      "default": "Join our mailing list!"
+    },
+    {
+      "type": "textarea",
+      "id": "mailing_description",
+      "label": "Mailing List Description",
+      "default": "Get a special discount off your first order when you sign up for emails today."
+    },
+    {
+      "type": "text",
+      "id": "mailing_button_text",
+      "label": "Mailing Button Text",
+      "default": "Subscribe"
+    },
+    {
+      "type": "text",
+      "id": "text_title",
+      "label": "Text Subscription Title",
+      "default": "Get started for free"
+    },
+    {
+      "type": "textarea",
+      "id": "text_description",
+      "label": "Text Subscription Description",
+      "default": "Be the first to know about new styles, special sales, and more."
+    },
+    {
+      "type": "text",
+      "id": "text_button_text",
+      "label": "Text Button Text",
+      "default": "Subscribe"
+    },
+    {
+      "type": "inline_richtext",
+      "id": "privacy_text",
+      "label": "Privacy Text",
+      "default": "By signing up you agree to our Privacy Policy and Notice of Financial Incentive."
+    },
+    {
+      "type": "url",
+      "id": "privacy_link",
+      "label": "Privacy Policy Link"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Default Subscription Section",
+      "category": "Marketing",
+      "settings": {
+        "mailing_title": "Join our mailing list!",
+        "mailing_description": "Get a special discount off your first order when you sign up for emails today.",
+        "mailing_button_text": "Subscribe",
+        "text_title": "Want to text, too?",
+        "text_description": "Be the first to know about new styles, special sales, and more.",
+        "text_button_text": "Subscribe",
+        "privacy_text": "By signing up you agree to our Privacy Policy and Notice of Financial Incentive.",
+        "privacy_link": "/pages/privacy-policy",
+        "background_color": "#ff5733"
+      }
+    }
+  ]
+}
+{% endschema %}

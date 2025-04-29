@@ -1,0 +1,144 @@
+
+
+<!-- ///////////   Our Graphics Store  ----  grid-product-link.liquid Cache22     ||||||||||||||||||||||||||-->
+
+
+
+
+<div class="wrapper-spacing--v  wrapper-spacing--h new-graphics-store">
+<div class="image-product-link">
+  <div class="featured-heading">
+{% if section.settings.section_title %}
+  <h2 class="">{{ section.settings.section_title }}</h2>
+{% endif %}
+  </div>
+<div class="image-product-slider image-link-block-section">
+  {% for block in section.blocks %}
+    {% if block.type == "image_link" %}
+      <div class="image-link-block">
+        {% if block.settings.block_image %}
+          <a href="{{ block.settings.block_link | escape }}" class="image-link">
+            <img src="{{ block.settings.block_image | img_url: 'master' }}" alt="Block Image" />
+          </a>
+        {% endif %}
+      </div>
+    {% endif %}
+  {% endfor %}
+</div>
+<!-- <div class="slider-btn">
+          <button type='button' class='slider-prevs3'><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+</svg></button>
+          <button type='button' class='slider-nexts3'><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
+</svg></button>
+        </div> -->
+      <div class="graphics-store-btn swiper-btn--wrapper swiper-btn-layout__{{ settings.hover_navigation_desktop }}">
+            <div class=" slider-prevs3 swiper-button--prev btn dynamic-section-button--{{ navigation_id }}">
+              {% render 'theme-icon', icon: 'arrow_left' %}
+            </div>
+            <div class="slider-nexts3 swiper-button--next btn dynamic-section-button--{{ navigation_id }}">
+              {% render 'theme-icon', icon: 'arrow_right' %}
+            </div>
+          </div>
+<!-- "View All" Button -->
+<div class="view-all-button-container">
+  <a href="{{ section.settings.view_all_link }}" class="view-all-button">
+    {{ section.settings.view_all_text }}
+  </a>
+</div>
+</div>
+</div>
+
+<script>
+   $('.image-product-slider').slick({
+            dots: false,
+            infinite: false,
+            speed: 300,
+            slidesToShow: 5,
+            slidesToScroll: 1,
+            arrows: true,
+            prevArrow: '.slider-prevs3',
+            nextArrow: '.slider-nexts3',
+            responsive: [
+              {
+                breakpoint: 900,
+                settings: {
+                  slidesToShow: 3,
+                  slidesToScroll: 1,
+                  infinite: true,
+                  dots: true
+                }
+              },
+              {
+                breakpoint: 600,
+                settings: {
+                  slidesToShow: 2,
+                  slidesToScroll: 1
+                }
+              },
+              {
+                breakpoint: 480,
+                settings: {
+                  slidesToShow: 1.5,
+                  slidesToScroll: 1
+                }
+              }
+            ]
+          });
+</script>
+
+
+
+
+
+{% schema %}
+{
+  "name": "Image Link Blocks",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Our Featured Links"
+    },
+    {
+      "type": "text",
+      "id": "view_all_text",
+      "label": "View All Button Text",
+      "default": "View All"
+    },
+    {
+      "type": "url",
+      "id": "view_all_link",
+      "label": "View All Button Link",
+      "default": "/collections/all"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "image_link",
+      "name": "Image and Link Block",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "block_image",
+          "label": "Image"
+        },
+        {
+          "type": "url",
+          "id": "block_link",
+          "label": "Link"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Link Blocks",
+      "category": "Custom"
+    }
+  ]
+}
+  
+{% endschema %}

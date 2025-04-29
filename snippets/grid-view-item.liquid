@@ -1,0 +1,206 @@
+{% liquid 
+  assign image_stretch = false
+
+  assign crop_setting = settings.product-grid
+  if crop_setting == "square"
+    assign image_crop = "aspect-ratio--square"
+    assign image_stretch = true
+  elsif crop_setting == "tall"
+    assign image_crop = "aspect-ratio--tall"
+    assign image_stretch = true
+  elsif crop_setting == "wide"
+    assign image_crop = "aspect-ratio--wide"
+    assign image_stretch = true
+  else
+    assign image_crop = false
+    assign image_stretch = false
+  endif
+
+  assign alignment_class = 'text-align--' | append: settings.product_card_text_alignment
+
+  assign quick_shop_desktop_enabled = settings.enable_quick_shop_desktop
+  assign quick_shop_mobile_enabled = settings.enable_quick_shop_mobile
+
+  if quick_shop_desktop_enabled == false and quick_shop_mobile_enabled
+    assign quick_shop_mobile_only = true
+  endif
+
+  if quick_shop_desktop_enabled and quick_shop_mobile_enabled == false
+    assign quick_shop_desktop_only = true
+  endif
+
+  if settings.show_product_card_vendor
+    assign vendor_font = 'product-grid--vendor-font-' | append: settings.type_card_vendor_font
+  endif
+
+  if settings.show_product_card_title
+    assign title_font = 'product-grid--title-font-' | append: settings.type_card_title_font
+  endif
+
+  if settings.show_product_card_price
+    assign price_font = 'product-grid--price-font-' | append: settings.type_card_price_font
+  endif
+
+  if settings.show_card_color_swatches
+    assign show_color_label = settings.show_card_color_swatch_label
+  endif
+
+  if settings.product_card_max_lines > 0
+    if settings.product_card_max_lines == 1
+      assign truncate_value = 20
+    elsif settings.product_card_max_lines == 2
+      assign truncate_value = 40
+    elsif settings.product_card_max_lines == 3
+      assign truncate_value = 60
+    elsif settings.product_card_max_lines == 4
+      assign truncate_value = 80
+    endif
+  endif
+%}
+
+<safe-load-scripts class="hidden">
+  <script src="{{ 'component-product-card.js' | asset_url }}" type="module" defer="defer" data-flow-load-key="component-product-card"></script>
+</safe-load-scripts>
+
+<product-card
+  class="grid-view-item {{ alignment_class }}"
+  data-product-available="{{ product.available }}"
+  data-product-variants-size="{{ product.variants.size }}"
+  data-product-id="{{ product.variants.first.id }}"
+  data-product-url="{{ product.url }}"
+  data-grid-count-desktop="{{ grid_count_desktop }}"
+  data-grid-count-mobile="{{ grid_count_mobile }}"
+  data-current_variant="{{ product.selected_or_first_available_variant | json | escape }}"
+>
+  <div>
+    <div class="grid-view-item-image">
+
+      {%- liquid
+        if enable_badges
+          if product.available
+            assign preorder_string = 'products.product.preorder' | t | downcase
+            assign preorder_product = false
+
+            for tag in product.tags
+              assign lowecase_tag = tag | downcase
+              if lowecase_tag contains preorder_string
+                assign preorder_product = true
+              endif
+              assign lowecase_tag = tag | downcase
+              if lowecase_tag contains preorder_string
+                assign preorder_product = true
+              endif
+              if preorder_product == false and tag contains '_badge:'
+                assign custom_badge = tag | remove: '_badge:'
+              endif
+            endfor
+
+            if preorder_product
+              render 'badge' with badge: 'preorder', preorder_badge: preorder_string
+            elsif custom_badge
+              render 'badge' with badge: 'custom', custom_badge: custom_badge
+            else
+              render 'badge' with badge: 'sale', badge_product: product
+            endif
+          else
+            render 'badge' with badge: 'sold-out'
+          endif
+        endif
+      -%}
+
+      <a href="{{ product.url }}" title="{{ product.title }}" class="grid__image grid__image__match {% if settings.product-grid == 'natural' %} image-height--natural{% endif %}" tabindex="-1" data-product-card-link>
+        {% if image_crop %}<div class="aspect-ratio {{ image_crop }}">{% endif %}
+          {% if product.media.size > 0 %}
+            {% assign image = product.featured_media %}
+            {% render 'responsive-image' with image, alt: image.alt, allow_stretch: image_stretch, blur: false, props: 'data-product-card-image', loading: loading %}
+
+            {% if settings.show_card_color_swatches %}
+              {% assign swatch_image_attributes = 'data-product-card-swatch-image style="opacity: 0;"' %}
+              {% render 'responsive-image' with image, wrapper_class: "product-card__image product-card__image--swatch", alt: image.alt, allow_stretch: image_stretch, blur: false, props: swatch_image_attributes %}
+            {% endif %}
+
+            {% if settings.hover-effect and product.media.size > 1 %}
+              {% assign image = product.media[1] %}
+              {% render 'responsive-image' with image, wrapper_class: "product-card__image product-card__image--secondary", alt: image.alt, allow_stretch: image_stretch, blur: false %}
+            {% endif %}
+          {% else %}
+            {% capture current %}{% cycle 1, 2, 3, 4, 5, 6 %}{% endcapture %}
+            {{ 'product-' | append: current | placeholder_svg_tag: 'icon icon--placeholder grid__image' }}
+          {% endif %}
+        {% if image_crop %}</div>{% endif %}
+      </a>
+
+      <div class="product-card-image--bottom-wrapper">
+        <!-- Image-area quick-shop removed per request -->
+      </div>
+
+    </div>
+
+    {% if settings.show_product_card_vendor %}
+      <div class="product-grid--vendor {{ vendor_font }}">{{ product.vendor }}</div>
+    {% endif %}
+
+    {% if settings.show_product_card_title %}
+      <div class="product-grid--title {{ title_font }}">
+        <a{% unless settings.product_card_text_alignment == 'right' %} class="text-truncate--line"{% endunless %} href="{{ product.url }}" data-product-card-link>
+          {% if settings.product_card_max_lines > 0 and settings.product_card_text_alignment == 'right' %}
+            {{ product.title | truncate: truncate_value }}
+          {% else %}
+            {{ product.title }}
+          {% endif %}
+        </a>
+      </div>
+    {% endif %}
+
+    {% if settings.show_product_card_price %}
+      <div class="product-grid--price {{ price_font }}">
+        {% render 'product-grid-item-price', price_product: product, collection: collection %}
+      </div>
+    {% endif %}
+
+    {%- comment -%}
+    ↓ Variant-chooser moved here ↓
+    {%- endcomment -%}
+    {% if quick_shop_desktop_enabled or quick_shop_mobile_enabled %}
+      <div class="quick-add-wrapper{% if product.variants.size == 1 %} is-singular{% endif %}">
+        {% if product.variants.size > 1 and product.available %}
+          {% if quick_shop_desktop_enabled %}
+            <a
+              class="btn quick-add-button-variants quick-add-button-variants-desktop"
+              href="{{ product.url }}"
+              data-product-card-link
+              tabindex="0"
+            >
+              {{ 'products.product.view_options' | t }}
+            </a>
+          {% endif %}
+          {% if quick_shop_mobile_enabled %}
+            <a
+              class="quick-add-button-variants quick-add-button-variants-mobile icon-btn-focus-inner btn-hover-default-inner"
+              href="{{ product.url }}"
+              data-product-card-link
+              tabindex="0"
+            >
+              <span class="btn-colors-primary round-icon-btn-sm">
+                {% render 'theme-icon' with icon: 'shopping-bag', iconClasses: 'quick-view-mobile-icon', iconSize: 16 %}
+              </span>
+            </a>
+          {% endif %}
+        {% endif %}
+      </div>
+    {% endif %}
+
+    {% if settings.show_product_rating %}
+      <div class="product-grid--rating">
+        {% render 'reviews-star-rating' with rating_product: product, star_color: settings.star_rating_color, classes: alignment_class, star_size: settings.star_size, no_reviews_label: settings.no_reviews_label, show_rating_as: settings.show_rating_as, show_product_rating_if_no_reviews: settings.show_product_rating_if_no_reviews, color_scheme: section_color_scheme %}
+      </div>
+    {% endif %}
+
+    {% if settings.show_card_color_swatches %}
+      {% for option in product.options_with_values %}
+        {% render 'card-color-swatch' with swatch_product: product, swatch_option: option, hide_out_of_stock_variants: false, show_color_label: show_color_label, option_index: forloop.index %}
+      {% endfor %}
+    {% endif %}
+
+  </div>
+</product-card>

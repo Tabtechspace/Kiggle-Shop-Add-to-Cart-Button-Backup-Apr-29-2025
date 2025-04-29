@@ -1,0 +1,248 @@
+{% schema %}
+{
+  "name": "Tab Collection",
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_title",
+      "label": "Section Title",
+      "default": "Featured Collections"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "collection",
+      "name": "Tab Collection",
+      "settings": [
+        {
+          "type": "text",
+          "id": "tab_title",
+          "label": "Tab Title",
+          "default": "New Arrivals"
+        },
+        {
+          "type": "collection",
+          "id": "collection",
+          "label": "Select Collection"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tab Collection"
+    }
+  ]
+}
+{% endschema %}
+
+<div class="featured-collection-tabs wrapper-spacing--v wrapper-spacing--h">
+  <div class="width--content">
+  <div class="featured-heading">
+    <h2 class="">{{ section.settings.section_title }}</h2>
+  </div>
+
+  <!-- Tab Navigation -->
+  <ul class="tab-nav">
+    {% for block in section.blocks %}
+      <li class="tab-item">
+        <a href="#tab-{{ block.id }}">{{ block.settings.tab_title }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <!-- Tab Content -->
+  <div class="tab-content">
+    {% for block in section.blocks %}
+      <div id="tab-{{ block.id }}" class="tab-pane">
+        {% assign collection = collections[block.settings.collection] %}
+
+        <div class="products-slider">
+          {% for product in collection.products %}
+            <div class="product-item">
+              <a href="{{ product.url }}">
+            <div class="product-img">
+                <img src="{{ product.featured_image | img_url: 'master' }}" alt="{{ product.title }}">
+      
+<form class="add-to-cart-form" action="/cart/add" method="post">
+  <input type="hidden" name="id" value="{{ product.variants.first.id }}">
+  <button class="btn-cart-icon" type="submit" data-drawer-open aria-controls="global-drawer">Add to Cart</button>
+</form>
+
+            </div>
+            <div class="product-details">
+                <h5 class="product-title">{{ product.title }}</h5>
+                <p>{{ product.price | money }}</p>
+            </div>
+              </a>
+               
+            </div>
+           
+          {% endfor %}
+        </div>
+        <div class="slider-btn">
+          <button type='button' class='slider-prev'><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-left" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8"/>
+</svg></button>
+          <button type='button' class='slider-next'><svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="currentColor" class="bi bi-arrow-right" viewBox="0 0 16 16">
+  <path fill-rule="evenodd" d="M1 8a.5.5 0 0 1 .5-.5h11.793l-3.147-3.146a.5.5 0 0 1 .708-.708l4 4a.5.5 0 0 1 0 .708l-4 4a.5.5 0 0 1-.708-.708L13.293 8.5H1.5A.5.5 0 0 1 1 8"/>
+</svg></button>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+  var tabLinks = document.querySelectorAll(".tab-nav a");
+  var tabPanes = document.querySelectorAll(".tab-pane");
+
+  function initializeSlider(pane) {
+    var slider = pane.querySelector('.products-slider');
+    if (slider && !slider.classList.contains('slick-initialized')) {
+      $(slider).slick({
+        slidesToShow: 4,
+        slidesToScroll: 1,
+        arrows: true,
+        dots: false,
+        infinite: false,
+        prevArrow: ".slider-prev",
+        nextArrow: ".slider-next",
+         responsive: [
+            {
+          breakpoint: 900,
+          settings: {
+            slidesToShow: 3,
+            slidesToScroll: 2
+          }
+            },
+        {
+          breakpoint: 600,
+          settings: {
+            slidesToShow: 2,
+            slidesToScroll: 2
+          }
+        },
+        {
+          breakpoint: 480,
+          settings: {
+            slidesToShow: 1.5,
+            slidesToScroll: 1
+          }
+        }
+      ]
+      });
+    }
+  }
+
+  tabLinks.forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      e.preventDefault();
+
+      // Remove active classes from all tabs
+      tabLinks.forEach(function (link) {
+        link.classList.remove("active");
+      });
+
+      // Hide all tab panes
+      tabPanes.forEach(function (pane) {
+        pane.classList.remove("active");
+      });
+
+      // Add active class to clicked tab and show corresponding content
+      link.classList.add("active");
+      var targetPane = document.querySelector(link.getAttribute("href"));
+      targetPane.classList.add("active");
+
+      // Initialize the slider when the tab is shown
+      initializeSlider(targetPane);
+    });
+  });
+
+  // Activate the first tab by default
+  tabLinks[0].classList.add("active");
+  tabPanes[0].classList.add("active");
+  initializeSlider(tabPanes[0]); // Initialize the first tab slider
+
+});
+
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+  // Select all add-to-cart buttons
+  var addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+
+  addToCartButtons.forEach(function(button) {
+    button.addEventListener('click', function(e) {
+      e.preventDefault(); // Prevent default form submission
+
+      var form = button.closest('.add-to-cart-form');
+      var formData = new FormData(form);
+
+      console.log('Adding to cart, form data:', formData);
+
+      // AJAX request to add product to cart
+      fetch('/cart/add.js', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'X-Requested-With': 'XMLHttpRequest',
+          'Accept': 'application/json',
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log('Product added to cart:', data);
+        updateCartDrawer(data);
+      })
+      .catch(error => {
+        console.error('Error during add to cart:', error);
+      });
+    });
+  });
+
+  // Function to update the cart drawer
+  function updateCartDrawer(cartItem) {
+    // Ensure there's a cart drawer element to update
+    var cartDrawer = document.getElementById('cart-drawer');
+    if (!cartDrawer) {
+      console.error('Cart drawer not found!');
+      return;
+    }
+
+    var cartItemHtml = `
+      <div class="cart-item">
+        <p>Product: ${cartItem.title}</p>
+        <p>Quantity: ${cartItem.quantity}</p>
+      </div>
+    `;
+
+    cartDrawer.innerHTML += cartItemHtml; // Append item to cart drawer
+    cartDrawer.classList.add('open'); // Ensure the cart drawer is visible
+  }
+});
+
+</script>
+<style>
+button.btn-cart-icon {
+    background-image: url(https://cdn.shopify.com/s/files/1/0644/6317/5871/files/noun-plus-7280384_1.png?v=1729249459);
+    background-repeat: no-repeat;
+    background-size: contain;
+    color: transparent;
+    border: none !important;
+    position: relative !important;
+    background-color: transparent;
+    position: relative;
+    left: 53px;
+    top: -15px;
+}
+</style>

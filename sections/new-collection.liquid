@@ -1,0 +1,323 @@
+
+
+<!-- SHOP BY CATEGORY ---  new-collection.liquid cache22   -->
+
+
+
+
+{% assign grid_item_id = 'grid-item--' | append: section.id %}
+{% render 'button-color-overrides' with
+  id: grid_item_id,
+  style: settings.quick_shop_button_style,
+  text_color: section.settings.button_text_color,
+  background_color: section.settings.button_background_color
+%}
+
+{{ 'section-featured-collection.min.css' | asset_url | stylesheet_tag }}
+<safe-load-scripts class="hidden">
+  <script src="{{ 'component-product-card.js' | asset_url }}" type="module" defer="defer" data-flow-load-key="component-product-card"></script>
+</safe-load-scripts>
+
+<div class="collectiontabb shop-the-look wrapper-spacing--v wrapper-spacing--h color-scheme--{{ section.settings.colors }}" data-wetheme-section-type="collection--featured-collection" data-wetheme-section-id="{{ section.id }}">
+  <div class="width--content">
+    <!-- Section title and description -->
+    {% render 'dynamic-section-header' with section_title: section.settings.title, section_description: section.settings.description %}
+
+    <!-- Tab Navigation -->
+    <div class="collection-tabs">
+      <ul class="tab-list">
+        {% for block in section.blocks %}
+          <li class="tab-item {% if forloop.first %}active{% endif %}" data-tab="tab-{{ forloop.index }}">
+            {{ block.settings.collection | split: '/' | last | capitalize }}
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <div class="tab-content">
+      <div class="homepage-indiv-section-wrapper grid--full homepage-featured-content-wrapper">
+        {% for block in section.blocks %}
+          <div class="tab-pane {% if forloop.first %}active{% endif %}" id="tab-{{ forloop.index }}">
+            {% assign collection = collections[block.settings.collection] %}
+            {% assign grid_item_width = '' %}
+            
+            {% case block.settings.grid_desktop %}
+              {% when 2 %} {% assign grid_item_width = 'large--one-half' %}
+              {% when 3 %} {% assign grid_item_width = 'large--one-third' %}
+              {% when 4 %} {% assign grid_item_width = 'large--one-quarter' %}
+              {% when 5 %} {% assign grid_item_width = 'large--one-fifth' %}
+              {% when 6 %} {% assign grid_item_width = 'large--one-sixth' %}
+            {% endcase %}
+            
+            {% case block.settings.grid_mobile %}
+              {% when "1" %} {% assign mobile_item_width = 'small--one-whole' %}
+              {% when "2" %} {% assign mobile_item_width = 'small--one-half' %}
+            {% endcase %}
+            
+            <div class="flex-box">
+          
+             
+              <div class="tab-slider ">
+                {% if section.settings.override_button_colors %}
+                  {% render 'button-color-overrides' with
+                    id: navigation_id,
+                    style: 'filled',
+                    text_color: section.settings.button_text_color,
+                    background_color: section.settings.button_background_color
+                  %}
+                {% endif %}
+                {% for product in collection.products limit: block.settings.products_to_show %}
+                  <div class="grid__item {{ grid_item_width }} {{ mobile_item_width }} featured-product--grid-item">
+                    {% render 'grid-view-item', product: product, collection: collection, section_id: section.id %}
+                  </div>
+                {% endfor %}
+              </div>
+
+
+<!-- SHOP BY CATEGORY Arrow Button ---  new-collection.liquid cache22   -->
+              
+           <div class="swiper-btn--wrapper swiper-btn-layout__{{ settings.hover_navigation_desktop }}">
+            <div class=" slider-prevss swiper-button--prev btn dynamic-section-button--{{ navigation_id }}">
+              {% render 'theme-icon', icon: 'arrow_left' %}
+            </div>
+            <div class="slider-nextss swiper-button--next btn dynamic-section-button--{{ navigation_id }}">
+              {% render 'theme-icon', icon: 'arrow_right' %}
+            </div>
+          </div>
+
+<!-- **************************   -->
+
+              
+            </div>
+            
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get all tab items and tab panes
+    const tabItems = document.querySelectorAll('.tab-item');
+    const tabPanes = document.querySelectorAll('.tab-pane');
+
+    // Function to initialize the Slick slider
+    const initializeSlider = (pane) => {
+        $(pane).find('.tab-slider').slick({
+            dots: false,
+            infinite: false,
+            speed: 300,
+            slidesToShow: 4, // Show 4 slides on desktop
+            slidesToScroll: 1,
+            arrows: true,
+            prevArrow: $(pane).find('.slider-prevss'),
+            nextArrow: $(pane).find('.slider-nextss'),
+            responsive: [
+                {
+                    breakpoint: 768, // Change to mobile view at 768px
+                    settings: {
+                        slidesToShow: 1.5, // Show 1 slide on mobile
+                        slidesToScroll: 1
+                    }
+                }
+            ]
+        });
+    };
+
+    // Function to handle tab switching
+    const switchTab = (index) => {
+        // Remove active class from all tab items
+        tabItems.forEach(item => item.classList.remove('active'));
+        // Hide all tab panes
+        tabPanes.forEach(pane => pane.classList.remove('active'));
+
+        // Add active class to the selected tab item and show corresponding tab pane
+        tabItems[index].classList.add('active');
+        tabPanes[index].classList.add('active');
+
+        // Reinitialize Slick slider for the active tab pane
+        $(tabPanes[index]).find('.tab-slider').slick('setPosition');
+    };
+
+    // Attach click event to each tab item
+    tabItems.forEach((item, index) => {
+        item.addEventListener('click', () => {
+            switchTab(index);
+        });
+    });
+
+    // Initialize Slick sliders for each tab pane
+    tabPanes.forEach(pane => {
+        initializeSlider(pane);
+    });
+});
+
+</script>
+
+
+
+<style>
+  .image-width {
+    width: 50%;
+    max-width: 500px;
+  }
+  .image-width img {
+    width: 100%;
+    height: 100%;
+  }
+  .flex-box {
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+  }
+.collectiontabb .shop-the-look .product-grid--wrapper .grid__item.large--one-quarter {
+    width: 23%;
+}
+
+  .shop-the-look .swiper-wrapper {
+    justify-content: center;
+  }
+  .collection-tabs {
+    margin-bottom: 5px;
+  }
+.tab-list {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    justify-content: center;
+    padding-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+  .tab-item {
+    padding: 3px 18px;
+    cursor: pointer;
+   font-family: Poppins, sans-serif !important; 
+    color: #00000080;
+    font-weight: 400;
+  }
+.tab-item.active {
+    font-weight: bold;
+    border-bottom: 0px;
+    border-radius: 10px;
+    background: #DEF2DC;
+      color: #000;
+
+}
+ .tab-slider .grid__item {
+    padding: 0 1rem;
+  }
+  .tab-item {
+    margin-right: 5px;
+}
+  .tab-pane {
+    display: none;
+  }
+  .tab-pane.active {
+    display: block;
+  }
+  .collectiontabb .btn--underlined.quick-add-button-variants.quick-add-button-variants-desktop{
+ background-image: url(https://cdn.shopify.com/s/files/1/0644/6317/5871/files/Group_86_1.png?v=1730888463);
+    position: absolute;
+ 
+    background-size: contain;
+    color: transparent;
+    background-position: top;
+    top: -43px;
+
+   right: 14px;
+    width: 30px;
+    height: 30px;
+}
+    .slider-btn button.slider-prevss.slick-arrow {
+    background-color: transparent;
+    border: none;
+    padding: 5px;
+    border: 1px solid black;
+    border-radius: 100px;
+    line-height: 0;
+    position: absolute;
+        left: -40px;
+     width: 36px;
+    background-repeat: no-repeat;
+}
+  .slider-btn button.slider-nextss.slick-arrow {
+   background-color: transparent;
+    border: none;
+    padding: 5px;
+    border: 1px solid black;
+border-radius: 100px;
+    line-height: 0;
+    position: absolute;
+    right: -40px;
+       width: 36px;
+    background-repeat: no-repeat
+    
+}
+  @media (max-width: 767px) {
+        .collectiontabb .swiper-button--prev {
+    left: -5px !important;
+}
+    .collectiontabb .swiper-button--next {
+    right: -5px !important;
+}
+  }
+</style>
+
+
+
+{% schema %}
+{
+  "name": "New Collection",
+  "blocks": [
+    {
+      "type": "collection_block",
+      "name": "Collection",
+      "settings": [
+        {
+          "id": "main-image",
+          "type": "image_picker",
+          "label": "Main Image"
+        },
+        {
+          "id": "collection",
+          "type": "collection",
+          "label": "t:all.Collection"
+        },
+       
+        {
+          "id": "grid_mobile",
+          "type": "radio",
+          "label": "t:all.Product_per_row_mobile",
+          "options": [
+            {
+              "value": "1",
+              "label": "t:all.1"
+            },
+            {
+              "value": "2",
+              "label": "t:all.2"
+            }
+          ],
+          "default": "2"
+        },
+        {
+          "type": "checkbox",
+          "id": "override_button_colors",
+          "label": "Color",
+          "default": false
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "New Collection",
+      "category": "Collection"
+    }
+  ]
+}
+{% endschema %}

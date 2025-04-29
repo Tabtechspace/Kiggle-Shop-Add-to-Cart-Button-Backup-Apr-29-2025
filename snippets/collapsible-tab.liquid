@@ -20,7 +20,13 @@
                     {{ content }}
                   <div class="sizeee">
                     {% if product.metafields.custom.size_guide_image != blank %}
-                        <img src="{{ product.metafields.custom.size_guide_image | img_url: 'large' }}">
+                        <div class="size-guide-container">
+                            <img src="{{ product.metafields.custom.size_guide_image | img_url: 'large' }}" alt="Size Guide" class="size-guide-image">
+                            <div class="size-guide-overlay">
+                                <h3>Size Guide</h3>
+                                <p>Please refer to the size chart below for accurate measurements</p>
+                            </div>
+                        </div>
                     {% endif %}
                   </div>
                                     <div class="founder-imm">

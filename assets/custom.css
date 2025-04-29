@@ -2529,3 +2529,48 @@ div#insta-feed {
  
 }
 
+.size-guide-container {
+  position: relative;
+  margin: 20px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.size-guide-image {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.size-guide-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  background: rgba(0,0,0,0.7);
+  color: white;
+  padding: 15px;
+  text-align: center;
+}
+
+.size-guide-overlay h3 {
+  margin: 0 0 10px 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.size-guide-overlay p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+@media screen and (max-width: 768px) {
+  .size-guide-overlay {
+    position: relative;
+    background: #f5f5f5;
+    color: #333;
+  }
+}
+
